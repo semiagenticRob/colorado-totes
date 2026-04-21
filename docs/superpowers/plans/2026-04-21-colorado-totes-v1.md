@@ -9,6 +9,7 @@
 **Tech Stack:** Next.js 15 · TypeScript · Tailwind · shadcn/ui · Supabase (Postgres + Auth + Storage) · Stripe · Resend + React Email · Vitest · Playwright · Vercel · GitHub Actions
 
 **Phases:**
+
 - Phase 0 — Repo scaffold, tooling, CI
 - Phase 1 — Schema + RLS foundations
 - Phase 2 — Auth, users, role/scope middleware
@@ -35,19 +36,23 @@ Each task produces a focused commit. TDD is mandatory for `lib/domain/` and `lib
 ### Task 0.1: Initialize Next.js project with TypeScript + Tailwind
 
 **Files:**
+
 - Create: `package.json`, `tsconfig.json`, `next.config.ts`, `tailwind.config.ts`, `postcss.config.mjs`, `app/layout.tsx`, `app/page.tsx`, `app/globals.css`, `.gitignore`, `.nvmrc`
 
 - [ ] **Step 1: Bootstrap Next.js**
 
 Run from the repo root (`/Users/robertwarren/Projects/colorado-totes`):
+
 ```bash
 npx create-next-app@latest . --typescript --tailwind --app --src-dir=false --import-alias="@/*" --no-eslint --use-npm --yes
 ```
+
 Accept overwrite of README if prompted (our README is near-empty).
 
 - [ ] **Step 2: Pin Node version**
 
 Create `.nvmrc` with contents:
+
 ```
 20
 ```
@@ -57,6 +62,7 @@ Create `.nvmrc` with contents:
 ```bash
 npm run dev
 ```
+
 Expected: server boots on :3000 and renders the default page. Kill with Ctrl+C.
 
 - [ ] **Step 4: Commit**
@@ -71,6 +77,7 @@ git commit -m "chore: scaffold Next.js 15 app with TypeScript and Tailwind"
 ### Task 0.2: Add ESLint + Prettier + typecheck scripts
 
 **Files:**
+
 - Create: `.eslintrc.json`, `.prettierrc`, `.prettierignore`
 - Modify: `package.json` (scripts + devDependencies)
 
@@ -116,6 +123,7 @@ coverage
 - [ ] **Step 5: Add scripts to `package.json`**
 
 Merge into `"scripts"`:
+
 ```json
 "lint": "next lint",
 "format": "prettier --write .",
@@ -128,6 +136,7 @@ Merge into `"scripts"`:
 ```bash
 npm run lint && npm run format:check && npm run typecheck
 ```
+
 All three must pass.
 
 - [ ] **Step 7: Commit**
@@ -142,6 +151,7 @@ git commit -m "chore: add eslint, prettier, and typecheck tooling"
 ### Task 0.3: Add Vitest for unit + integration tests
 
 **Files:**
+
 - Create: `vitest.config.ts`, `tests/.gitkeep`
 - Modify: `package.json`
 
@@ -180,6 +190,7 @@ export default defineConfig({
 - [ ] **Step 4: Create placeholder test to verify runner**
 
 Create `tests/smoke.test.ts`:
+
 ```typescript
 import { describe, it, expect } from "vitest";
 
@@ -195,6 +206,7 @@ describe("smoke", () => {
 ```bash
 npm test
 ```
+
 Expected: 1 passed.
 
 - [ ] **Step 6: Commit**
@@ -209,6 +221,7 @@ git commit -m "chore: add vitest with smoke test"
 ### Task 0.4: Define the module boundaries (empty directories + README stubs)
 
 **Files:**
+
 - Create: `lib/domain/README.md`, `lib/db/README.md`, `lib/email/README.md`, `lib/billing/README.md`
 
 - [ ] **Step 1: Create `lib/domain/README.md`**
@@ -255,6 +268,7 @@ git commit -m "docs: document module boundaries in lib/"
 ### Task 0.5: GitHub Actions CI workflow
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Create the workflow**
@@ -300,6 +314,7 @@ Verify the workflow runs green on GitHub. If it fails, fix inline, push, re-veri
 ### Task 1.1: Install and initialize Supabase CLI
 
 **Files:**
+
 - Create: `supabase/config.toml` (auto-generated), `supabase/.gitignore`
 - Modify: `package.json`
 
@@ -314,6 +329,7 @@ npm i -D supabase
 ```bash
 npx supabase init
 ```
+
 Answer prompts with defaults (do not generate VS Code settings).
 
 - [ ] **Step 3: Add db scripts to `package.json`**
@@ -331,7 +347,9 @@ Answer prompts with defaults (do not generate VS Code settings).
 ```bash
 npm run db:start
 ```
+
 Expected: Docker starts containers, URLs printed. Then:
+
 ```bash
 npm run db:stop
 ```
@@ -348,6 +366,7 @@ git commit -m "chore: add supabase CLI and db scripts"
 ### Task 1.2: First migration — extensions, enums, companies, buildings, users
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000001_core_schema.sql`
 
 - [ ] **Step 1: Write the migration**
@@ -408,6 +427,7 @@ create index users_building_id_idx on users(building_id);
 npm run db:start
 npm run db:reset
 ```
+
 Expected: migration applied, tables created.
 
 - [ ] **Step 3: Verify schema**
@@ -415,6 +435,7 @@ Expected: migration applied, tables created.
 ```bash
 npx supabase db psql -c "\dt public.*"
 ```
+
 Expected: `companies`, `buildings`, `users` present.
 
 - [ ] **Step 4: Commit**
@@ -429,6 +450,7 @@ git commit -m "feat(db): add core tenancy schema (companies, buildings, users)"
 ### Task 1.3: Second migration — inventory tables
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000002_inventory.sql`
 
 - [ ] **Step 1: Write the migration**
@@ -488,6 +510,7 @@ git commit -m "feat(db): add inventory tables (pools, losses, acquisitions)"
 ### Task 1.4: Third migration — move-ins
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000003_move_ins.sql`
 
 - [ ] **Step 1: Write the migration**
@@ -546,6 +569,7 @@ git commit -m "feat(db): add move_ins and move_in_events"
 ### Task 1.5: Fourth migration — costs and invoices
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000004_billing.sql`
 
 - [ ] **Step 1: Write the migration**
@@ -607,6 +631,7 @@ git commit -m "feat(db): add invoices and cost_line_items"
 ### Task 1.6: Fifth migration — tenant emails
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000005_tenant_emails.sql`
 
 - [ ] **Step 1: Write the migration**
@@ -644,6 +669,7 @@ git commit -m "feat(db): add tenant_emails queue"
 ### Task 1.7: Sixth migration — views
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000006_views.sql`
 
 - [ ] **Step 1: Write the migration**
@@ -707,6 +733,7 @@ git commit -m "feat(db): add dashboard views (inventory, billing, overdue)"
 ### Task 1.8: Seventh migration — RLS policies
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000007_rls.sql`
 
 - [ ] **Step 1: Write the migration**
@@ -887,6 +914,7 @@ git commit -m "feat(db): enable RLS with role/scope-based policies"
 ### Task 1.9: Seed script for local development
 
 **Files:**
+
 - Create: `supabase/seed.sql`
 
 - [ ] **Step 1: Write the seed**
@@ -921,6 +949,7 @@ insert into tote_pools (building_id, location, count) values
 ```bash
 npm run db:reset
 ```
+
 Expected: seed applied after migrations.
 
 - [ ] **Step 3: Commit**
@@ -937,6 +966,7 @@ git commit -m "chore(db): add local dev seed"
 ### Task 2.1: Install Supabase JS client and create typed DB types
 
 **Files:**
+
 - Create: `lib/db/types.generated.ts` (generated), `lib/db/client.ts`
 - Modify: `package.json` (add `db:types` script)
 
@@ -1006,6 +1036,7 @@ git commit -m "feat(db): add supabase clients (server + admin) and generated typ
 ### Task 2.2: Env file + Next.js env validation
 
 **Files:**
+
 - Create: `.env.example`, `.env.local` (gitignored), `lib/env.ts`
 
 - [ ] **Step 1: Create `.env.example`**
@@ -1068,6 +1099,7 @@ git commit -m "feat: add env loader and example env file"
 ### Task 2.3: Role/scope JWT hook via Postgres function
 
 **Files:**
+
 - Create: `supabase/migrations/20260421000008_jwt_hook.sql`
 
 Auth hooks in Supabase let us inject custom claims into every JWT. We enrich each token with `user_role`, `company_id`, `building_id`.
@@ -1107,6 +1139,7 @@ grant execute on function public.custom_access_token_hook to supabase_auth_admin
 - [ ] **Step 2: Configure Supabase to use this hook**
 
 Edit `supabase/config.toml`, set:
+
 ```toml
 [auth.hook.custom_access_token]
 enabled = true
@@ -1131,6 +1164,7 @@ git commit -m "feat(auth): inject role/company/building claims via JWT hook"
 ### Task 2.4: Current-user helper + role guards
 
 **Files:**
+
 - Create: `lib/auth/current-user.ts`, `lib/auth/guards.ts`
 - Test: `tests/domain/guards.test.ts`
 
@@ -1148,15 +1182,11 @@ describe("guards", () => {
   });
 
   it("requireRole throws on mismatched role", () => {
-    expect(() =>
-      requireRole({ role: "pm_billing_admin" } as any, ["company_admin"]),
-    ).toThrow();
+    expect(() => requireRole({ role: "pm_billing_admin" } as any, ["company_admin"])).toThrow();
   });
 
   it("canActOnBuilding: totes_admin can always act", () => {
-    expect(
-      canActOnBuilding({ role: "totes_admin" } as any, "any-building-id"),
-    ).toBe(true);
+    expect(canActOnBuilding({ role: "totes_admin" } as any, "any-building-id")).toBe(true);
   });
 
   it("canActOnBuilding: pm scoped to building", () => {
@@ -1179,6 +1209,7 @@ describe("guards", () => {
 ```bash
 npm test
 ```
+
 Expected: fails (module doesn't exist).
 
 - [ ] **Step 3: Create `lib/auth/current-user.ts`**
@@ -1202,9 +1233,9 @@ export async function currentUser(): Promise<AuthUser | null> {
   if (!user) return null;
 
   const claims = user.app_metadata ?? {};
-  const role = (user.user_metadata?.user_role ??
-    claims.user_role ??
-    null) as AuthUser["role"] | null;
+  const role = (user.user_metadata?.user_role ?? claims.user_role ?? null) as
+    | AuthUser["role"]
+    | null;
   if (!role) return null;
 
   return {
@@ -1222,10 +1253,7 @@ export async function currentUser(): Promise<AuthUser | null> {
 ```typescript
 import type { AuthUser } from "./current-user";
 
-export function requireRole(
-  user: AuthUser,
-  allowed: AuthUser["role"][],
-): void {
+export function requireRole(user: AuthUser, allowed: AuthUser["role"][]): void {
   if (!allowed.includes(user.role)) {
     throw new Error(`Forbidden: requires one of ${allowed.join(", ")}`);
   }
@@ -1264,6 +1292,7 @@ git commit -m "feat(auth): current-user helper and role/scope guards"
 ### Task 2.5: Route groups and auth middleware
 
 **Files:**
+
 - Create: `middleware.ts`, `app/(portal)/layout.tsx`, `app/admin/layout.tsx`, `app/(auth)/login/page.tsx`
 - Delete: `app/page.tsx` (default scaffold page); we'll redirect root
 
@@ -1404,6 +1433,7 @@ export default function LoginPage() {
 - [ ] **Step 5: Update `app/page.tsx` to redirect to login**
 
 Replace contents with:
+
 ```typescript
 import { redirect } from "next/navigation";
 export default function Home() {
@@ -1416,6 +1446,7 @@ export default function Home() {
 ```bash
 npm run dev
 ```
+
 - Visit `/` → redirects to `/login`.
 - Visit `/app` → redirects to `/login?next=/app`.
 - Visit `/admin` → redirects to `/login?next=/admin`.
@@ -1434,6 +1465,7 @@ git commit -m "feat(auth): middleware + route group layouts + login page"
 ### Task 3.1: Batch math
 
 **Files:**
+
 - Create: `lib/domain/batches.ts`
 - Test: `tests/domain/batches.test.ts`
 
@@ -1478,10 +1510,7 @@ export function totesFromBatches(n: number): number {
 export type UnitType = "studio" | "1br" | "2br" | "3br_plus" | "other";
 export type RecommendationMap = Record<UnitType, number>;
 
-export function recommendedBatches(
-  unitType: UnitType,
-  map: RecommendationMap,
-): number {
+export function recommendedBatches(unitType: UnitType, map: RecommendationMap): number {
   return map[unitType] ?? map.other ?? 1;
 }
 ```
@@ -1504,6 +1533,7 @@ git commit -m "feat(domain): batch size constants and recommendation lookup"
 ### Task 3.2: Move-in state machine
 
 **Files:**
+
 - Create: `lib/domain/move-in-state.ts`
 - Test: `tests/domain/move-in-state.test.ts`
 
@@ -1573,6 +1603,7 @@ npm test && git add -A && git commit -m "feat(domain): move-in state machine"
 ### Task 3.3: Palletization logic
 
 **Files:**
+
 - Create: `lib/domain/palletization.ts`
 - Test: `tests/domain/palletization.test.ts`
 
@@ -1580,8 +1611,11 @@ npm test && git add -A && git commit -m "feat(domain): move-in state machine"
 
 ```typescript
 import { describe, it, expect } from "vitest";
-import { PALLET_SIZE, isReadyForPalletization, palletizationProgressPct }
-  from "@/lib/domain/palletization";
+import {
+  PALLET_SIZE,
+  isReadyForPalletization,
+  palletizationProgressPct,
+} from "@/lib/domain/palletization";
 
 describe("palletization", () => {
   it("threshold is 120", () => {
@@ -1625,6 +1659,7 @@ npm test && git add -A && git commit -m "feat(domain): palletization threshold l
 ### Task 3.4: Cost aggregation
 
 **Files:**
+
 - Create: `lib/domain/costs.ts`
 - Test: `tests/domain/costs.test.ts`
 
@@ -1634,11 +1669,11 @@ npm test && git add -A && git commit -m "feat(domain): palletization threshold l
 import { describe, it, expect } from "vitest";
 import { aggregatePeriod, type CostLine } from "@/lib/domain/costs";
 
-const line = (
-  category: CostLine["category"],
-  passthrough: number,
-  markup: number,
-): CostLine => ({ category, passthroughCents: passthrough, markupCents: markup });
+const line = (category: CostLine["category"], passthrough: number, markup: number): CostLine => ({
+  category,
+  passthroughCents: passthrough,
+  markupCents: markup,
+});
 
 describe("cost aggregation", () => {
   it("rolls up per category and grand total", () => {
@@ -1654,9 +1689,7 @@ describe("cost aggregation", () => {
     expect(r.passthroughCents).toBe(5000 + 6000 + 8000 + 12000);
     expect(r.markupCents).toBe(500 + 600 + 800 + 2000);
     expect(r.subscriptionCents).toBe(29900);
-    expect(r.totalCents).toBe(
-      5000 + 500 + 6000 + 600 + 8000 + 800 + 12000 + 2000 + 29900,
-    );
+    expect(r.totalCents).toBe(5000 + 500 + 6000 + 600 + 8000 + 800 + 12000 + 2000 + 29900);
   });
 
   it("handles empty input", () => {
@@ -1670,7 +1703,11 @@ describe("cost aggregation", () => {
 
 ```typescript
 export type CostCategory =
-  | "delivery" | "pickup" | "warehousing" | "management_fee" | "subscription";
+  | "delivery"
+  | "pickup"
+  | "warehousing"
+  | "management_fee"
+  | "subscription";
 
 export type CostLine = {
   category: CostCategory;
@@ -1713,6 +1750,7 @@ npm test && git add -A && git commit -m "feat(domain): cost aggregation"
 ### Task 3.5: Overdue calculation
 
 **Files:**
+
 - Create: `lib/domain/overdue.ts`
 - Test: `tests/domain/overdue.test.ts`
 
@@ -1781,6 +1819,7 @@ npm test && git add -A && git commit -m "feat(domain): overdue calculation"
 Models the four state transitions that mutate `tote_pools`: delivery (at_3pl → out_with_tenant), return (out_with_tenant → in_building), pickup (in_building → at_3pl), and initial acquisition (external → in_building or at_3pl).
 
 **Files:**
+
 - Create: `lib/domain/inventory.ts`
 - Test: `tests/domain/inventory.test.ts`
 
@@ -1814,8 +1853,9 @@ describe("inventory delta", () => {
   });
   it("acquisition adds to a specified pool", () => {
     const p = pools(0, 0, 0);
-    expect(applyDelta(p, { kind: "acquisition", into: "in_building", totes: 200 }))
-      .toEqual(pools(200, 0, 0));
+    expect(applyDelta(p, { kind: "acquisition", into: "in_building", totes: 200 })).toEqual(
+      pools(200, 0, 0),
+    );
   });
   it("throws when source pool would go negative", () => {
     const p = pools(0, 10, 0);
@@ -1846,7 +1886,11 @@ export function applyDelta(p: Pools, d: Delta): Pools {
       return { ...p, at_3pl: p.at_3pl - d.totes, out_with_tenant: p.out_with_tenant + d.totes };
     case "return":
       if (p.out_with_tenant < d.totes) throw new Error("Insufficient out_with_tenant");
-      return { ...p, out_with_tenant: p.out_with_tenant - d.totes, in_building: p.in_building + d.totes };
+      return {
+        ...p,
+        out_with_tenant: p.out_with_tenant - d.totes,
+        in_building: p.in_building + d.totes,
+      };
     case "pickup":
       if (p.in_building < d.totes) throw new Error("Insufficient in_building");
       return { ...p, in_building: p.in_building - d.totes, at_3pl: p.at_3pl + d.totes };
@@ -1869,6 +1913,7 @@ npm test && git add -A && git commit -m "feat(domain): inventory pool delta oper
 ### Task 4.1: Companies repo
 
 **Files:**
+
 - Create: `lib/db/repos/companies.ts`
 - Test: `tests/db/companies.test.ts`
 
@@ -1929,22 +1974,14 @@ export async function createCompany(input: NewCompany) {
 
 export async function getCompanyBySlug(slug: string) {
   const db = supabaseAdmin();
-  const { data, error } = await db
-    .from("companies")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  const { data, error } = await db.from("companies").select("*").eq("slug", slug).maybeSingle();
   if (error) throw error;
   return data;
 }
 
 export async function getCompanyById(id: string) {
   const db = supabaseAdmin();
-  const { data, error } = await db
-    .from("companies")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await db.from("companies").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -1969,6 +2006,7 @@ git commit -m "feat(db): companies repo + tests"
 ### Task 4.2: Buildings repo
 
 **Files:**
+
 - Create: `lib/db/repos/buildings.ts`
 - Test: `tests/db/buildings.test.ts`
 
@@ -2056,11 +2094,7 @@ export async function listBuildingsForCompany(companyId: string) {
 
 export async function getBuildingById(id: string) {
   const db = supabaseAdmin();
-  const { data, error } = await db
-    .from("buildings")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await db.from("buildings").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -2100,6 +2134,7 @@ npm test && git add -A && git commit -m "feat(db): buildings repo + pool auto-in
 ### Task 4.3: Users repo (invite-driven)
 
 **Files:**
+
 - Create: `lib/db/repos/users.ts`
 - Test: `tests/db/users.test.ts`
 
@@ -2161,10 +2196,9 @@ export type InviteInput = {
 
 export async function inviteUser(input: InviteInput) {
   const db = supabaseAdmin();
-  const { data: invited, error: inviteErr } = await db.auth.admin.inviteUserByEmail(
-    input.email,
-    { redirectTo: `${env().appBaseUrl}/invite/accept` },
-  );
+  const { data: invited, error: inviteErr } = await db.auth.admin.inviteUserByEmail(input.email, {
+    redirectTo: `${env().appBaseUrl}/invite/accept`,
+  });
   if (inviteErr) throw inviteErr;
   const authUserId = invited.user!.id;
 
@@ -2214,6 +2248,7 @@ npm test && git add -A && git commit -m "feat(db): users repo with invite flow"
 ### Task 4.4: Move-ins repo (with event log writes)
 
 **Files:**
+
 - Create: `lib/db/repos/move-ins.ts`
 - Test: `tests/db/move-ins.test.ts`
 
@@ -2341,10 +2376,7 @@ export async function getMoveInById(id: string) {
   return data;
 }
 
-export async function markDelivered(
-  id: string,
-  opts: { actor_user_id?: string | null } = {},
-) {
+export async function markDelivered(id: string, opts: { actor_user_id?: string | null } = {}) {
   const db = supabaseAdmin();
   const mi = await getMoveInById(id);
   if (!mi) throw new Error("move_in not found");
@@ -2379,10 +2411,7 @@ export async function markDelivered(
   });
 }
 
-export async function markReturned(
-  id: string,
-  opts: { actor_user_id?: string | null } = {},
-) {
+export async function markReturned(id: string, opts: { actor_user_id?: string | null } = {}) {
   const db = supabaseAdmin();
   const mi = await getMoveInById(id);
   if (!mi) throw new Error("move_in not found");
@@ -2425,6 +2454,7 @@ export async function listMoveInEvents(moveInId: string) {
 - [ ] **Step 3: Add pool increment/decrement SQL functions**
 
 Create `supabase/migrations/20260421000009_pool_rpcs.sql`:
+
 ```sql
 create or replace function increment_pool(
   p_building_id uuid, p_location tote_location, p_amount int
@@ -2460,6 +2490,7 @@ git commit -m "feat(db): move-ins repo with delivery/return transitions"
 ### Task 4.5: Pools + losses + acquisitions repo
 
 **Files:**
+
 - Create: `lib/db/repos/inventory.ts`
 - Test: `tests/db/inventory.test.ts`
 
@@ -2557,11 +2588,7 @@ export async function recordAcquisition(input: {
   notes?: string | null;
 }) {
   const db = supabaseAdmin();
-  const { data, error } = await db
-    .from("tote_acquisitions")
-    .insert(input)
-    .select("*")
-    .single();
+  const { data, error } = await db.from("tote_acquisitions").insert(input).select("*").single();
   if (error) throw error;
   await db.rpc("increment_pool", {
     p_building_id: input.building_id,
@@ -2594,6 +2621,7 @@ npm test && git add -A && git commit -m "feat(db): inventory repo (pools/losses/
 ### Task 4.6: Cost lines + invoices repo
 
 **Files:**
+
 - Create: `lib/db/repos/billing.ts`
 - Test: `tests/db/billing.test.ts`
 
@@ -2671,10 +2699,7 @@ export async function recordCostLineItem(input: {
   return data;
 }
 
-export async function listLineItemsForBuilding(
-  buildingId: string,
-  billingPeriod: string,
-) {
+export async function listLineItemsForBuilding(buildingId: string, billingPeriod: string) {
   const db = supabaseAdmin();
   const { data, error } = await db
     .from("cost_line_items")
@@ -2711,6 +2736,7 @@ npm test && git add -A && git commit -m "feat(db): billing repo (line items, inv
 Verifies that a `pm_billing_admin` JWT cannot read another building's data, and a `company_admin` can read all of their company's buildings but not another company's.
 
 **Files:**
+
 - Create: `tests/db/rls.test.ts`, `tests/helpers/jwt.ts`
 
 - [ ] **Step 1: Create JWT helper**
@@ -2727,10 +2753,7 @@ export function anonClientWithJwt(jwt: string) {
   );
 }
 
-export async function signInAs(
-  email: string,
-  password: string,
-): Promise<string> {
+export async function signInAs(email: string, password: string): Promise<string> {
   const db = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -2844,6 +2867,7 @@ git commit -m "test(db): RLS isolation tests for PM and Company Admin"
 ### Task 5.1: Admin shell + nav
 
 **Files:**
+
 - Create: `app/admin/page.tsx`, `app/admin/_components/AdminNav.tsx`
 
 - [ ] **Step 1: Create `app/admin/_components/AdminNav.tsx`**
@@ -2868,6 +2892,7 @@ export function AdminNav() {
 - [ ] **Step 2: Update `app/admin/layout.tsx` to include nav**
 
 Replace existing layout body to return:
+
 ```typescript
 return (
   <div className="min-h-screen bg-neutral-50">
@@ -2876,6 +2901,7 @@ return (
   </div>
 );
 ```
+
 Add the import at top: `import { AdminNav } from "./_components/AdminNav";`
 
 - [ ] **Step 3: Create `app/admin/page.tsx`**
@@ -2904,6 +2930,7 @@ git add -A && git commit -m "feat(admin): shell + nav"
 ### Task 5.2: Companies list + create
 
 **Files:**
+
 - Create: `app/admin/companies/page.tsx`, `app/admin/companies/new/page.tsx`, `app/admin/companies/_actions.ts`
 
 - [ ] **Step 1: Create server action `app/admin/companies/_actions.ts`**
@@ -3034,6 +3061,7 @@ git commit -m "feat(admin): companies list + create"
 ### Task 5.3: Company detail + building create
 
 **Files:**
+
 - Create: `app/admin/companies/[id]/page.tsx`, `app/admin/companies/[id]/buildings/new/page.tsx`, extend `app/admin/companies/_actions.ts`
 
 - [ ] **Step 1: Add createBuilding action to `_actions.ts`**
@@ -3162,6 +3190,7 @@ git commit -m "feat(admin): company detail + create building"
 ### Task 5.4: Record initial acquisition from building detail
 
 **Files:**
+
 - Create: `app/admin/companies/[id]/buildings/[bid]/page.tsx`, extend `_actions.ts`
 
 - [ ] **Step 1: Add acquisition action**
@@ -3293,6 +3322,7 @@ git commit -m "feat(admin): building detail with acquisition logging"
 ### Task 5.5: Invite first user to a company
 
 **Files:**
+
 - Create: `app/admin/companies/[id]/users/page.tsx`, extend `_actions.ts`
 
 - [ ] **Step 1: Add invite action**
@@ -3304,9 +3334,7 @@ export async function inviteUserAction(companyId: string, formData: FormData) {
   requireRole(user, ["totes_admin"]);
 
   const email = String(formData.get("email")).trim().toLowerCase();
-  const role = String(formData.get("role")) as
-    | "pm_billing_admin"
-    | "company_admin";
+  const role = String(formData.get("role")) as "pm_billing_admin" | "company_admin";
   const buildingId = String(formData.get("building_id") ?? "") || null;
   const { inviteUser } = await import("@/lib/db/repos/users");
   await inviteUser({
@@ -3415,6 +3443,7 @@ git commit -m "feat(admin): invite users to company/building"
 ### Task 6.1: PM portal shell
 
 **Files:**
+
 - Create: `app/(portal)/app/page.tsx`, `app/(portal)/_components/PortalNav.tsx`
 
 - [ ] **Step 1: Create nav**
@@ -3513,6 +3542,7 @@ git commit -m "feat(portal): PM dashboard shell with inventory stats + banners"
 ### Task 6.2: Stripe integration stub + Customer creation
 
 **Files:**
+
 - Create: `lib/billing/stripe.ts`, `lib/billing/customers.ts`
 - Test: `tests/billing/customers.test.ts`
 
@@ -3543,9 +3573,7 @@ export function stripe(): Stripe {
 import { stripe } from "./stripe";
 import { supabaseAdmin } from "@/lib/db/client";
 
-export async function ensureStripeCustomerForBuilding(
-  buildingId: string,
-): Promise<string> {
+export async function ensureStripeCustomerForBuilding(buildingId: string): Promise<string> {
   const db = supabaseAdmin();
   const { data: b, error } = await db
     .from("buildings")
@@ -3559,10 +3587,7 @@ export async function ensureStripeCustomerForBuilding(
     name: b.name,
     metadata: { building_id: b.id },
   });
-  await db
-    .from("buildings")
-    .update({ stripe_customer_id: customer.id })
-    .eq("id", buildingId);
+  await db.from("buildings").update({ stripe_customer_id: customer.id }).eq("id", buildingId);
   return customer.id;
 }
 
@@ -3632,6 +3657,7 @@ npm test && git add -A && git commit -m "feat(billing): Stripe client + customer
 ### Task 6.3: Billing page with Stripe Elements
 
 **Files:**
+
 - Create: `app/(portal)/app/billing/page.tsx`, `app/(portal)/app/billing/_CardSetupForm.tsx`, `app/api/billing/setup-intent/route.ts`
 
 - [ ] **Step 1: Create the setup-intent route**
@@ -3765,6 +3791,7 @@ git commit -m "feat(portal): Stripe Elements card setup flow"
 ### Task 6.4: Stripe webhook handler — SetupIntent succeeded flips billing_status
 
 **Files:**
+
 - Create: `app/api/webhooks/stripe/route.ts`
 
 - [ ] **Step 1: Write the handler**
@@ -3798,8 +3825,7 @@ export async function POST(req: Request) {
   switch (event.type) {
     case "setup_intent.succeeded": {
       const si = event.data.object as Stripe.SetupIntent;
-      const customerId =
-        typeof si.customer === "string" ? si.customer : si.customer?.id;
+      const customerId = typeof si.customer === "string" ? si.customer : si.customer?.id;
       if (!customerId) break;
       const { data: building } = await db
         .from("buildings")
@@ -3809,18 +3835,13 @@ export async function POST(req: Request) {
       if (building) {
         // Attach the PM as the default payment method on the customer
         const pm =
-          typeof si.payment_method === "string"
-            ? si.payment_method
-            : si.payment_method?.id;
+          typeof si.payment_method === "string" ? si.payment_method : si.payment_method?.id;
         if (pm) {
           await stripe().customers.update(customerId, {
             invoice_settings: { default_payment_method: pm },
           });
         }
-        await db
-          .from("buildings")
-          .update({ billing_status: "active" })
-          .eq("id", building.id);
+        await db.from("buildings").update({ billing_status: "active" }).eq("id", building.id);
       }
       break;
     }
@@ -3830,8 +3851,7 @@ export async function POST(req: Request) {
         .from("invoices")
         .update({ status: "paid", paid_at: new Date().toISOString() })
         .eq("stripe_invoice_id", inv.id);
-      const customerId =
-        typeof inv.customer === "string" ? inv.customer : inv.customer?.id;
+      const customerId = typeof inv.customer === "string" ? inv.customer : inv.customer?.id;
       if (customerId) {
         await db
           .from("buildings")
@@ -3846,8 +3866,7 @@ export async function POST(req: Request) {
         .from("invoices")
         .update({ status: "failed", failed_at: new Date().toISOString() })
         .eq("stripe_invoice_id", inv.id);
-      const customerId =
-        typeof inv.customer === "string" ? inv.customer : inv.customer?.id;
+      const customerId = typeof inv.customer === "string" ? inv.customer : inv.customer?.id;
       if (customerId) {
         await db
           .from("buildings")
@@ -3888,6 +3907,7 @@ git commit -m "feat(billing): Stripe webhook handler (setup/paid/failed)"
 ### Task 7.1: Create-move-in form
 
 **Files:**
+
 - Create: `app/(portal)/app/move-ins/new/page.tsx`, `app/(portal)/app/move-ins/_actions.ts`
 
 - [ ] **Step 1: Create action**
@@ -4020,6 +4040,7 @@ git commit -m "feat(portal): create move-in form"
 ### Task 7.2: Move-ins list + detail
 
 **Files:**
+
 - Create: `app/(portal)/app/move-ins/page.tsx`, `app/(portal)/app/move-ins/[id]/page.tsx`
 
 - [ ] **Step 1: Create list**
@@ -4168,6 +4189,7 @@ git commit -m "feat(portal): move-ins list + detail with mark-returned"
 ### Task 7.3: Admin pending-deliveries queue with mark-delivered + cost entry
 
 **Files:**
+
 - Create: `app/admin/pending-deliveries/page.tsx`, `app/admin/pending-deliveries/_actions.ts`
 
 - [ ] **Step 1: Create action**
@@ -4293,11 +4315,13 @@ git commit -m "feat(admin): pending-deliveries queue with mark-delivered + cost 
 ### Task 8.1: Queue rows when move-in is created and when delivered
 
 **Files:**
+
 - Modify: `lib/db/repos/move-ins.ts` (queue emails inside createMoveIn and markDelivered)
 
 - [ ] **Step 1: Add email-queue writes to `createMoveIn`**
 
 Inside `createMoveIn`, after the event insert, add:
+
 ```typescript
 await db.from("tenant_emails").insert({
   move_in_id: data.id,
@@ -4309,6 +4333,7 @@ await db.from("tenant_emails").insert({
 - [ ] **Step 2: Add email-queue writes to `markDelivered`**
 
 After the `delivered` event insert, add:
+
 ```typescript
 const deliveredAt = new Date();
 const miDate = new Date(mi.move_in_date + "T00:00:00Z");
@@ -4332,6 +4357,7 @@ await db.from("tenant_emails").insert([
 - [ ] **Step 3: Update existing move-ins test to assert email rows exist**
 
 Add to the existing test:
+
 ```typescript
 const { data: emails } = await supabaseAdmin()
   .from("tenant_emails")
@@ -4353,6 +4379,7 @@ npm test && git add -A && git commit -m "feat(email): queue tenant emails on mov
 ### Task 8.2: React Email templates
 
 **Files:**
+
 - Create: `lib/email/templates/Scheduled.tsx`, `lib/email/templates/Delivered.tsx`, `lib/email/templates/Reminder.tsx`
 
 - [ ] **Step 1: Install React Email**
@@ -4515,6 +4542,7 @@ git commit -m "feat(email): React Email templates for tenant sequence"
 ### Task 8.3: Resend sender + cron endpoint
 
 **Files:**
+
 - Create: `lib/email/send.ts`, `app/api/cron/send-tenant-emails/route.ts`
 
 - [ ] **Step 1: Create sender**
@@ -4535,9 +4563,7 @@ function resend() {
   return _resend;
 }
 
-async function publicLogoUrl(
-  storagePath: string | null,
-): Promise<string | undefined> {
+async function publicLogoUrl(storagePath: string | null): Promise<string | undefined> {
   if (!storagePath) return undefined;
   const db = supabaseAdmin();
   const { data } = db.storage.from("logos").getPublicUrl(storagePath);
@@ -4621,10 +4647,7 @@ export async function sendTenantEmail(rowId: string) {
   });
 
   if (sent.error) {
-    await db
-      .from("tenant_emails")
-      .update({ status: "failed" })
-      .eq("id", row.id);
+    await db.from("tenant_emails").update({ status: "failed" }).eq("id", row.id);
     throw sent.error;
   }
 
@@ -4685,11 +4708,10 @@ export async function GET(req: Request) {
 - [ ] **Step 3: Register cron in `vercel.json`**
 
 Create `vercel.json`:
+
 ```json
 {
-  "crons": [
-    { "path": "/api/cron/send-tenant-emails", "schedule": "*/5 * * * *" }
-  ]
+  "crons": [{ "path": "/api/cron/send-tenant-emails", "schedule": "*/5 * * * *" }]
 }
 ```
 
@@ -4725,5 +4747,3 @@ The remaining phases are logically straightforward follow-ons and should be plan
 - No placeholders, TBDs, or unresolved references in Phase 0–8 tasks.
 - Type consistency verified: `MoveInState`, `UnitType`, `CostCategory`, `Pools` shape, and repo function signatures all match across tasks.
 - Known dependency between tasks 7.3 (admin mark-delivered) and 8.1 (email queue writes inside `markDelivered`): 7.3 happens first; 8.1 modifies `markDelivered` to queue emails, which 7.3's server action benefits from once 8.1 lands.
-
-
