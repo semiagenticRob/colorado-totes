@@ -25,6 +25,7 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     coverage: { reporter: ["text", "html"] },
     env: loadDotEnvLocal(),
+    fileParallelism: false,
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, ".") },
