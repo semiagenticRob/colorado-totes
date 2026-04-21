@@ -12,7 +12,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff",
+    "db:push": "supabase db push"
   },
   "dependencies": {
     "next": "15.5.15",
@@ -33,6 +38,7 @@
     "eslint-config-next": "^16.2.4",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.3",
+    "supabase": "^2.93.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.5"

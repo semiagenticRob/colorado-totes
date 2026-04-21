@@ -4,3 +4,5 @@ node_modules
 supabase/.temp
 coverage
 docs/**/*.md
+supabase/config.toml
+supabase/.temp
