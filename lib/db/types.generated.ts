@@ -700,6 +700,23 @@ export type Database = {
       current_user_building_id: { Args: never; Returns: string }
       current_user_company_id: { Args: never; Returns: string }
       current_user_role: { Args: never; Returns: string }
+      custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      decrement_pool: {
+        Args: {
+          p_amount: number
+          p_building_id: string
+          p_location: Database["public"]["Enums"]["tote_location"]
+        }
+        Returns: undefined
+      }
+      increment_pool: {
+        Args: {
+          p_amount: number
+          p_building_id: string
+          p_location: Database["public"]["Enums"]["tote_location"]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       billing_status: "setup_pending" | "active" | "delinquent"
