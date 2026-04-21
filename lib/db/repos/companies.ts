@@ -20,11 +20,7 @@ export async function createCompany(input: NewCompany) {
 
 export async function getCompanyBySlug(slug: string) {
   const db = supabaseAdmin();
-  const { data, error } = await db
-    .from("companies")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  const { data, error } = await db.from("companies").select("*").eq("slug", slug).maybeSingle();
   if (error) throw error;
   return data;
 }
