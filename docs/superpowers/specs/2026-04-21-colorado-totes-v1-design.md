@@ -13,6 +13,7 @@ The SaaS is the operational source of truth for tote inventory, move-in scheduli
 ## 2. Goals & Non-goals
 
 ### Goals
+
 - Give property managers a single portal to schedule tenant move-in tote deliveries, track inventory, log returns, and view costs.
 - Let Colorado Totes staff operate the 3PL relationship through one dashboard that aggregates across all customer buildings.
 - Automate the tenant email sequence (scheduled, delivered, post-move-in reminder).
@@ -21,6 +22,7 @@ The SaaS is the operational source of truth for tote inventory, move-in scheduli
 - Architect for, but do not build: PMS integration, 3PL login/API, CSV bulk move-in upload, tenant-facing tracking page.
 
 ### Non-goals (V1)
+
 - Per-tote serial tracking (QR / barcode). Totes move in bulk counts of 20.
 - Tenant authentication or tenant-facing UI. Tenants are email recipients only.
 - Payment integration beyond Stripe card-on-file + monthly auto-charge. No payment-plan management, no ACH.
@@ -32,12 +34,12 @@ The SaaS is the operational source of truth for tote inventory, move-in scheduli
 
 Four roles total, all using a single login mechanism (Supabase Auth, email + password).
 
-| Role | Scope | Purpose |
-|---|---|---|
-| `pm_billing_admin` | One building | Daily operations for one building + full cost visibility + card-on-file management for that building. |
-| `company_admin` | Entire company (all buildings) | Rollup view across buildings. Can do everything a `pm_billing_admin` does on any of their buildings, plus user management and company settings. Cannot create new buildings. |
-| `totes_admin` | Backend — all companies | Colorado Totes staff. Creates companies and buildings, coordinates 3PL offline, enters completion + cost data into the platform, oversees billing. |
-| Tenant | N/A | Email recipient only. Receives three emails per move-in. No login. |
+| Role               | Scope                          | Purpose                                                                                                                                                                      |
+| ------------------ | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pm_billing_admin` | One building                   | Daily operations for one building + full cost visibility + card-on-file management for that building.                                                                        |
+| `company_admin`    | Entire company (all buildings) | Rollup view across buildings. Can do everything a `pm_billing_admin` does on any of their buildings, plus user management and company settings. Cannot create new buildings. |
+| `totes_admin`      | Backend — all companies        | Colorado Totes staff. Creates companies and buildings, coordinates 3PL offline, enters completion + cost data into the platform, oversees billing.                           |
+| Tenant             | N/A                            | Email recipient only. Receives three emails per move-in. No login.                                                                                                           |
 
 ## 4. Business Rules & Core Mechanics
 
@@ -54,6 +56,7 @@ Four roles total, all using a single login mechanism (Supabase Auth, email + pas
 ## 5. Architecture
 
 ### Stack
+
 - **Frontend + backend:** Next.js 15 (App Router), TypeScript, Tailwind, shadcn/ui. Server Components by default; Server Actions for all mutations.
 - **Database + auth + storage:** Supabase Postgres, Supabase Auth (email + password), Supabase Storage (building logos).
 - **Email:** Resend + React Email templates.
@@ -62,6 +65,7 @@ Four roles total, all using a single login mechanism (Supabase Auth, email + pas
 - **Monitoring:** Vercel Analytics + Supabase logs for V1. PostHog optional later.
 
 ### Module boundaries
+
 - `lib/domain/` — pure TypeScript business logic (state machines, batch math, cost rollups, palletization, overdue calc). No DB, no HTTP. Unit-tested.
 - `lib/db/` — the only module that imports the Supabase client. Typed repository functions; every other module goes through it.
 - `lib/email/` — React Email templates + Resend send helpers.
@@ -69,12 +73,14 @@ Four roles total, all using a single login mechanism (Supabase Auth, email + pas
 - `app/` — Next.js routes (App Router). Server Components for reads, Server Actions for writes.
 
 ### Multi-tenancy
+
 - Postgres RLS enforces scope at the row level. Every tenant-scoped table has policies keyed off JWT claims (`role`, `company_id`, `building_id`).
 - `totes_admin` bypasses tenant scoping (uses service-role key for elevated queries — only the admin portal routes use it).
 - `company_admin` sees rows where `company_id = jwt.company_id`.
 - `pm_billing_admin` sees rows where `building_id = jwt.building_id` (or for indirect tables, via a join to a row whose building matches).
 
 ### Repo layout
+
 ```
 colorado-totes/
   app/
@@ -109,11 +115,13 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 ### Tenancy & identity
 
 **`companies`**
+
 - `name text not null`
 - `slug text unique not null`
 - `settings jsonb not null default '{"overdue_days": 14}'::jsonb`
 
 **`buildings`**
+
 - `company_id uuid references companies on delete cascade`
 - `name text not null`
 - `address text not null`
@@ -124,6 +132,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 - `tenant_contact_info jsonb nullable` — drop-off location, contact name/email for tenant emails
 
 **`users`**
+
 - `id uuid primary key` — matches `auth.users.id`
 - `company_id uuid references companies`
 - `building_id uuid references buildings nullable` — null ⇒ company-scoped or totes_admin
@@ -134,12 +143,14 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 ### Inventory
 
 **`tote_pools`** — one row per `(building_id, location)`
+
 - `building_id uuid references buildings on delete cascade`
 - `location enum('in_building','at_3pl','out_with_tenant') not null`
 - `count int not null default 0 check (count >= 0)`
 - `unique (building_id, location)`
 
 **`tote_losses`**
+
 - `building_id uuid references buildings on delete cascade`
 - `count int not null check (count > 0)`
 - `reason enum('lost','damaged','decommissioned') not null`
@@ -147,6 +158,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 - `notes text`
 
 **`tote_acquisitions`**
+
 - `building_id uuid references buildings on delete cascade`
 - `count int not null check (count > 0)`
 - `acquisition_type enum('initial','reorder') not null`
@@ -155,6 +167,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 ### Move-ins
 
 **`move_ins`**
+
 - `building_id uuid references buildings on delete cascade`
 - `tenant_name text not null`
 - `tenant_email text not null`
@@ -170,6 +183,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 - `created_by_user_id uuid references users`
 
 **`move_in_events`** — append-only audit log
+
 - `move_in_id uuid references move_ins on delete cascade`
 - `event_type enum('created','delivered','returned','cancelled','email_scheduled_sent','email_delivered_sent','email_reminder_sent','email_bounced') not null`
 - `actor_user_id uuid references users nullable` — null for system
@@ -179,6 +193,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 ### Costs & billing
 
 **`cost_line_items`**
+
 - `building_id uuid references buildings on delete cascade`
 - `move_in_id uuid references move_ins nullable`
 - `category enum('delivery','pickup','warehousing','management_fee','subscription') not null`
@@ -191,6 +206,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 - `entered_by_user_id uuid references users`
 
 **`invoices`**
+
 - `building_id uuid references buildings on delete cascade`
 - `billing_period date not null` — first-of-month
 - `stripe_invoice_id text nullable`
@@ -205,6 +221,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 ### Email
 
 **`tenant_emails`**
+
 - `move_in_id uuid references move_ins on delete cascade`
 - `kind enum('scheduled','delivered','reminder_48h') not null`
 - `scheduled_for timestamptz not null`
@@ -268,6 +285,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 ## 8. Screens (Sitemap)
 
 ### PM / Billing Admin portal (`/app`)
+
 - `/app` — Building dashboard: inventory, upcoming move-ins, overdue flags, billing banner, month cost summary.
 - `/app/move-ins` — list with filters.
 - `/app/move-ins/new` — create form.
@@ -279,6 +297,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 - `/app/account` — profile, password change.
 
 ### Company Admin portal (same tree, extended)
+
 - Persistent scope picker in header: "All buildings ▾" or specific building. When a building is selected, screens behave identically to the PM portal for that building.
 - `/app` — company rollup dashboard with per-building breakdown table.
 - `/app/company/buildings` — list (read + edit, no create).
@@ -286,6 +305,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 - `/app/company/settings` — overdue_days, reorder contact info.
 
 ### Totes Admin portal (`/admin`)
+
 - `/admin` — global dashboard: companies, queues, delinquencies.
 - `/admin/pending-deliveries` — queue with mark-delivered action.
 - `/admin/palletization` — queue with mark-picked-up action.
@@ -296,6 +316,7 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 - `/admin/warehousing` — monthly batch entry of warehousing fees per building.
 
 ### Public
+
 - `/` — landing page (minimal V1).
 - `/login` — Supabase Auth.
 - `/invite/[token]` — accept invite, set password.
@@ -305,18 +326,22 @@ All tables include `id uuid default gen_random_uuid() primary key`, `created_at 
 Three transactional emails, rendered via React Email, sent via Resend. All are formal in tone, branded per building (logo + building name).
 
 ### #1 — Scheduled (trigger: move-in created)
+
 - Subject: "Your [Building Name] move-in totes are scheduled"
 - Confirms N totes will be delivered in the days leading up to move-in. Explains the service as a building-provided benefit.
 
 ### #2 — Delivered (trigger: admin marks delivered)
+
 - Subject: "Your [Building Name] totes have been delivered"
 - Confirms delivery. Provides use guidance and return instructions (from `tenant_contact_info`). References a follow-up reminder.
 
 ### #3 — Reminder (trigger: `delivered` or `move_in_date` + 48h, whichever is later)
+
 - Subject: "Welcome to [Building Name] — returning your totes"
 - Formal welcome. Specifies drop-off location and contact. No deadline in email.
 
 ### Mechanics
+
 - `tenant_emails` rows created at trigger time.
 - Vercel cron `/api/cron/send-tenant-emails` runs every 5 minutes, secured by a cron secret header. Processes up to 100 pending rows per run where `scheduled_for <= now()` and `status='pending'`. Sends via Resend, updates the row, and writes the corresponding `move_in_events` row.
 - Resend webhook (`/api/webhooks/resend`) updates `tenant_emails.status = 'bounced'` on bounce events and writes `move_in_events` (`email_bounced`).

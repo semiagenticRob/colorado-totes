@@ -1,0 +1,8 @@
+node_modules
+.next
+.vercel
+supabase/.temp
+coverage
+docs/**/*.md
+supabase/config.toml
+lib/db/types.generated.ts
