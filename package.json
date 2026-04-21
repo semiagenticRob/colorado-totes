@@ -17,9 +17,12 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:diff": "supabase db diff",
-    "db:push": "supabase db push"
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --local > lib/db/types.generated.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.104.0",
     "next": "15.5.15",
     "react": "19.1.0",
     "react-dom": "19.1.0"
