@@ -2,12 +2,16 @@ import js from "@eslint/js";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import prettier from "eslint-config-prettier";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
 
-export default [
+const config = [
   {
     ignores: ["node_modules", ".next", ".vercel", "coverage", "dist"],
   },
   js.configs.recommended,
+  ...nextCoreWebVitals,
+  ...nextTypeScript,
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     languageOptions: {
@@ -32,3 +36,5 @@ export default [
   },
   prettier,
 ];
+
+export default config;
