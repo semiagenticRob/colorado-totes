@@ -22,11 +22,14 @@
     "db:types": "supabase gen types typescript --local > lib/db/types.generated.ts"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^6.2.0",
+    "@stripe/stripe-js": "^9.2.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.0",
     "next": "15.5.15",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "stripe": "^22.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
