@@ -23,6 +23,11 @@ export async function createMoveIn(input: NewMoveIn) {
     event_type: "created",
     actor_user_id: input.created_by_user_id ?? null,
   });
+  await db.from("tenant_emails").insert({
+    move_in_id: data.id,
+    kind: "scheduled",
+    scheduled_for: new Date().toISOString(),
+  });
   return data;
 }
 
@@ -65,6 +70,15 @@ export async function markDelivered(id: string, opts: { actor_user_id?: string |
     event_type: "delivered",
     actor_user_id: opts.actor_user_id ?? null,
   });
+  const deliveredAt = new Date();
+  const miDate = new Date(mi.move_in_date + "T00:00:00Z");
+  const reminderAt = new Date(
+    Math.max(deliveredAt.getTime(), miDate.getTime()) + 48 * 60 * 60 * 1000,
+  );
+  await db.from("tenant_emails").insert([
+    { move_in_id: id, kind: "delivered", scheduled_for: deliveredAt.toISOString() },
+    { move_in_id: id, kind: "reminder_48h", scheduled_for: reminderAt.toISOString() },
+  ]);
 }
 
 export async function markReturned(id: string, opts: { actor_user_id?: string | null } = {}) {
