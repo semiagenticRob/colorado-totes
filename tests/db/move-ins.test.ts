@@ -12,6 +12,7 @@ import {
 
 async function reset() {
   const db = supabaseAdmin();
+  await db.from("tenant_emails").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await db.from("move_in_events").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await db.from("move_ins").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await db.from("tote_pools").delete().neq("id", "00000000-0000-0000-0000-000000000000");
@@ -76,5 +77,13 @@ describe("move-ins repo", () => {
     events = await listMoveInEvents(mi.id);
     const types = events.map((e) => e.event_type);
     expect(types).toEqual(expect.arrayContaining(["created", "delivered", "returned"]));
+
+    const { data: emails } = await supabaseAdmin()
+      .from("tenant_emails")
+      .select("kind")
+      .eq("move_in_id", mi.id);
+    expect(emails?.map((e) => e.kind)).toEqual(
+      expect.arrayContaining(["scheduled", "delivered", "reminder_48h"]),
+    );
   });
 });
